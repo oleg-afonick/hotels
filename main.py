@@ -1,7 +1,8 @@
 import uvicorn
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, Query, HTTPException
 from fastapi.openapi.docs import get_swagger_ui_html
 from starlette.middleware.cors import CORSMiddleware
+from math import ceil
 
 app = FastAPI()
 
@@ -21,13 +22,31 @@ app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"])
 
 hotels = [
     {"id": 1, "name": "Hotel 1", "address": "Address 1"},
-    {"id": 2, "name": "Hotel 2", "address": "Address 2"}
+    {"id": 2, "name": "Hotel 2", "address": "Address 2"},
+    {"id": 3, "name": "Hotel 3", "address": "Address 3"},
+    {"id": 4, "name": "Hotel 4", "address": "Address 4"},
+    {"id": 5, "name": "Hotel 5", "address": "Address 5"},
+    {"id": 6, "name": "Hotel 6", "address": "Address 6"},
+    {"id": 7, "name": "Hotel 7", "address": "Address 7"},
+    {"id": 8, "name": "Hotel 8", "address": "Address 8"},
+    {"id": 9, "name": "Hotel 9", "address": "Address 9"},
+    {"id": 10, "name": "Hotel 10", "address": "Address 10"},
+    {"id": 11, "name": "Hotel 11", "address": "Address 11"}
 ]
 
 
 @app.get("/hotels")
-def get_hotels():
-    return hotels
+def get_hotels(
+        page: int | None = Query(1, ge=1, le=len(hotels)),
+        per_page: int | None = Query(len(hotels), ge=1, le=len(hotels))
+) -> list[dict]:
+    if per_page > ceil(len(hotels) / page):
+        raise HTTPException(status_code=422, detail=f"per_page доступен не более {ceil(len(hotels) / page)}")
+    elif page == 1:
+        hotels_pagination = hotels[:per_page]
+    else:
+        hotels_pagination = hotels[(page - 1) * per_page:page * per_page]
+    return hotels_pagination
 
 
 @app.post("/hotels")
