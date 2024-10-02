@@ -2,10 +2,10 @@ from pydantic import BaseModel
 
 
 class HotelSchema(BaseModel):
-    name: str
-    address: str
+    title: str
+    location: str
 
 
 class HotelSchemaPATCH(BaseModel):
-    name: str | None = None
-    address: str | None = None
+    title: str | None = None
+    location: str | None = None
