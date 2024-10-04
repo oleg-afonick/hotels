@@ -49,17 +49,23 @@ async def post_hotels(hotel_data: HotelSchema = Body(openapi_examples={
 
     return {"status": "OK", "data": hotel}
 
-# @router.put("/{hotel_id}")
-# def hotels_put(hotel_id: int, hotel_data: HotelSchema):
-#     get_hotel = [hotel for hotel in hotels if hotel.get("id") == hotel_id]
-#     if get_hotel:
-#         hotel = get_hotel[0]
-#         hotel["name"] = hotel_data.name
-#         hotel["address"] = hotel_data.address
-#         return hotels
-#     return "Hotel not found"
-#
-#
+
+@router.put("/{hotel_id}")
+async def hotels_put(hotel_id: int, hotel_data: HotelSchema):
+    async with async_session_maker() as session:
+        await HotelsRepository(session).update(id=hotel_id, data=hotel_data)
+        await session.commit()
+    return {"status": "OK"}
+
+
+@router.delete("/{hotel_id}")
+async def hotels_put(hotel_id: int):
+    async with async_session_maker() as session:
+        await HotelsRepository(session).delete(id=hotel_id)
+        await session.commit()
+    return {"status": "OK"}
+
+
 # @router.patch("/{hotel_id}")
 # def hotels_patch(
 #         hotel_id: int, hotel_data: HotelSchemaPATCH):
@@ -68,15 +74,5 @@ async def post_hotels(hotel_data: HotelSchema = Body(openapi_examples={
 #         hotel = get_hotel[0]
 #         hotel["name"] = hotel_data.name if hotel_data.name else hotel["name"]
 #         hotel["address"] = hotel_data.address if hotel_data.address else hotel["address"]
-#         return hotels
-#     return "Hotel not found"
-#
-#
-# @router.delete("/{hotel_id}")
-# def hotels_delete(hotel_id: int):
-#     get_hotel = [hotel for hotel in hotels if hotel.get("id") == hotel_id]
-#     if get_hotel:
-#         hotel = get_hotel[0]
-#         hotels.remove(hotel)
 #         return hotels
 #     return "Hotel not found"
