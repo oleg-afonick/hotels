@@ -5,6 +5,7 @@ from src.api.dependencies import paginator
 from src.schemas.hotels import HotelSchema, HotelSchemaPATCH
 from sqlalchemy import insert, select
 from src.models.hotels import HotelsModel
+from src.repositories.hotels import HotelsRepository
 
 router = APIRouter(prefix="/hotels", tags=["Hotels"])
 
@@ -15,22 +16,14 @@ async def get_hotels(
         location: str | None = Query(None, description="Адрес отеля"),
         title: str | None = Query(None, description="Название отеля"),
 ):
-    per_page = pagination.per_page or 5
+    per_page = pagination.per_page or 10
     async with async_session_maker() as session:
-        query = select(HotelsModel)
-        if location:
-            query = query.filter(HotelsModel.location.icontains(location))
-        if title:
-            query = query.filter(HotelsModel.title.icontains(title))
-        query = (
-            query
-            .limit(per_page)
-            .offset((pagination.page - 1) * per_page)
+        return await HotelsRepository(session).get_all(
+            title=title,
+            location=location,
+            limit=per_page,
+            offset=(pagination.page - 1) * per_page
         )
-        print(query.compile(engine, compile_kwargs={"literal_binds": True}))
-        result = await session.execute(query)
-        hotels = result.scalars().all()
-        return hotels
 
 
 @router.post("")
@@ -51,13 +44,11 @@ async def post_hotels(hotel_data: HotelSchema = Body(openapi_examples={
     }
 })):
     async with async_session_maker() as session:
-        insert_hotel_stmt = insert(HotelsModel).values(**hotel_data.model_dump())
-        print(insert_hotel_stmt.compile(engine, compile_kwargs={"literal_binds": True}))
-        await session.execute(insert_hotel_stmt)
+        hotel = await HotelsRepository(session).add(data=hotel_data)
         await session.commit()
+        hotel = hotel.scalars().one_or_none()
 
-    return {"status": "OK"}
-
+    return {"status": "OK", "data": hotel}
 
 # @router.put("/{hotel_id}")
 # def hotels_put(hotel_id: int, hotel_data: HotelSchema):
