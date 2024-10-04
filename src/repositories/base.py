@@ -1,5 +1,5 @@
 from sqlalchemy import select, insert
-
+from pydantic import BaseModel
 from database import engine
 
 
@@ -19,7 +19,9 @@ class BaseRepository:
         result = await self.session.execute(query)
         return result.scalars().one_or_none()
 
-    async def add(self, data):
+    async def add(self, data: BaseModel):
         insert_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         print(insert_stmt.compile(engine, compile_kwargs={"literal_binds": True}))
-        return await self.session.execute(insert_stmt)
+        result = await self.session.execute(insert_stmt)
+        return result.scalars().one()
+

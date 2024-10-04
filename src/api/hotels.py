@@ -16,7 +16,7 @@ async def get_hotels(
         location: str | None = Query(None, description="Адрес отеля"),
         title: str | None = Query(None, description="Название отеля"),
 ):
-    per_page = pagination.per_page or 10
+    per_page = pagination.per_page or 5
     async with async_session_maker() as session:
         return await HotelsRepository(session).get_all(
             title=title,
@@ -44,9 +44,8 @@ async def post_hotels(hotel_data: HotelSchema = Body(openapi_examples={
     }
 })):
     async with async_session_maker() as session:
-        hotel = await HotelsRepository(session).add(data=hotel_data)
+        hotel = await HotelsRepository(session).add(hotel_data)
         await session.commit()
-        hotel = hotel.scalars().one_or_none()
 
     return {"status": "OK", "data": hotel}
 
