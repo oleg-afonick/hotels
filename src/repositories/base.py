@@ -25,12 +25,12 @@ class BaseRepository:
         result = await self.session.execute(insert_stmt)
         return result.scalars().one()
 
-    async def update(self, data: BaseModel, **filter_by):
-        update_stmt = update(self.model).filter_by(**filter_by).values(**data.model_dump())
+    async def update(self, data: BaseModel, exclude_unset: bool = False, **filter_by) -> None:
+        update_stmt = update(self.model).filter_by(**filter_by).values(**data.model_dump(exclude_unset=exclude_unset))
         print(update_stmt.compile(engine, compile_kwargs={"literal_binds": True}))
         await self.session.execute(update_stmt)
 
-    async def delete(self, **filter_by):
+    async def delete(self, **filter_by) -> None:
         delete_stmt = delete(self.model).filter_by(**filter_by)
         print(delete_stmt.compile(engine, compile_kwargs={"literal_binds": True}))
         await self.session.execute(delete_stmt)
