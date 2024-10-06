@@ -1,13 +1,11 @@
 from fastapi import Body, Query, APIRouter
 
-from src.database import async_session_maker, engine
+from src.database import async_session_maker
 from src.api.dependencies import paginator
-from src.schemas.hotels import HotelSchema, HotelSchemaPATCH
-from sqlalchemy import insert, select
-from src.models.hotels import HotelsModel
+from src.schemas.hotels import HotelSchema, HotelSchemaPostPut, HotelSchemaPatch
 from src.repositories.hotels import HotelsRepository
 
-router = APIRouter(prefix="/hotels", tags=["Hotels"])
+router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
 @router.get("")
@@ -33,7 +31,7 @@ async def get_hotel(hotel_id: int):
 
 
 @router.post("")
-async def post_hotels(hotel_data: HotelSchema = Body(openapi_examples={
+async def post_hotels(hotel_data: HotelSchemaPostPut = Body(openapi_examples={
     "1": {
         "summary": "Сочи",
         "value": {
@@ -57,7 +55,7 @@ async def post_hotels(hotel_data: HotelSchema = Body(openapi_examples={
 
 
 @router.put("/{hotel_id}")
-async def hotels_put(hotel_id: int, hotel_data: HotelSchema):
+async def hotels_put(hotel_id: int, hotel_data: HotelSchemaPostPut):
     async with async_session_maker() as session:
         await HotelsRepository(session).update(id=hotel_id, data=hotel_data)
         await session.commit()
@@ -74,7 +72,7 @@ async def hotels_delete(hotel_id: int):
 
 @router.patch("/{hotel_id}")
 async def hotels_patch(
-        hotel_id: int, hotel_data: HotelSchemaPATCH):
+        hotel_id: int, hotel_data: HotelSchemaPatch):
     async with async_session_maker() as session:
         await HotelsRepository(session).update(id=hotel_id, exclude_unset=True, data=hotel_data)
         await session.commit()
