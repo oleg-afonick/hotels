@@ -22,5 +22,9 @@ class AuthService:
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
 
+    @staticmethod
+    def decode_access_token(token: str) -> dict:
+        return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+
 
 auth_service = AuthService()

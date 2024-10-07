@@ -41,7 +41,7 @@ async def post_hotels(hotel_data: HotelSchemaPostPut = Body(openapi_examples=hot
 
 
 @router.put("/{hotel_id}")
-async def hotels_put(hotel_id: int, hotel_data: HotelSchemaPostPut):
+async def put_hotels(hotel_id: int, hotel_data: HotelSchemaPostPut):
     async with async_session_maker() as session:
         await HotelsRepository(session).update(id=hotel_id, data=hotel_data)
         await session.commit()
@@ -49,7 +49,7 @@ async def hotels_put(hotel_id: int, hotel_data: HotelSchemaPostPut):
 
 
 @router.delete("/{hotel_id}")
-async def hotels_delete(hotel_id: int):
+async def delete_hotels(hotel_id: int):
     async with async_session_maker() as session:
         await HotelsRepository(session).delete(id=hotel_id)
         await session.commit()
@@ -57,7 +57,7 @@ async def hotels_delete(hotel_id: int):
 
 
 @router.patch("/{hotel_id}")
-async def hotels_patch(
+async def patch_hotels(
         hotel_id: int, hotel_data: HotelSchemaPatch):
     async with async_session_maker() as session:
         await HotelsRepository(session).update(id=hotel_id, exclude_unset=True, data=hotel_data)

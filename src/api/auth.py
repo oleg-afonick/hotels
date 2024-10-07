@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Body, HTTPException, Response, Request
+from fastapi import APIRouter, Body, HTTPException, Response
 
+from src.api.dependencies import current_user_id
 from src.services.auth import auth_service
 
 from src.api.examples import users_example
@@ -22,7 +23,7 @@ async def register_user(data: UserSchemaRequestAdd = Body(openapi_examples=users
 
 
 @router.post("/login")
-async def register_user(data: UserSchemaRequestAdd, response: Response):
+async def login_user(response: Response, data: UserSchemaRequestAdd = Body(openapi_examples=users_example)):
     async with async_session_maker() as session:
         user = await UsersRepository(session).get_user_for_login(email=data.email)
         if not user:
@@ -35,8 +36,16 @@ async def register_user(data: UserSchemaRequestAdd, response: Response):
     return {"access_token": access_token}
 
 
-@router.get("/only_auth")
-async def only_auth(request: Request):
-    access_token = request.cookies.get("access_token")
+@router.get("/current_user")
+async def current_user(user_id: current_user_id):
+    async with async_session_maker() as session:
+        user = await UsersRepository(session).get_one_or_none(id=user_id)
 
-    return {"access_token": access_token}
+    return user
+
+
+@router.get("/logout")
+async def logout_user(response: Response):
+    response.delete_cookie("access_token")
+
+    return {"status": "OK"}
