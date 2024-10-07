@@ -1,5 +1,6 @@
 from fastapi import Body, Query, APIRouter
 
+from src.api.examples import hotels_example
 from src.database import async_session_maker
 from src.api.dependencies import paginator
 from src.schemas.hotels import HotelSchema, HotelSchemaPostPut, HotelSchemaPatch
@@ -31,22 +32,7 @@ async def get_hotel(hotel_id: int):
 
 
 @router.post("")
-async def post_hotels(hotel_data: HotelSchemaPostPut = Body(openapi_examples={
-    "1": {
-        "summary": "Сочи",
-        "value": {
-            "title": "Отель 5 звезд у Черного моря",
-            "location": "Сочи, ул. Моря, 1"
-        }
-    },
-    "2": {
-        "summary": "Дубай",
-        "value": {
-            "title": "Отель 5 звезд в Персидском заливе",
-            "location": "Дубай, ул. Шейха, 2"
-        }
-    }
-})):
+async def post_hotels(hotel_data: HotelSchemaPostPut = Body(openapi_examples=hotels_example)):
     async with async_session_maker() as session:
         hotel = await HotelsRepository(session).add(hotel_data)
         await session.commit()

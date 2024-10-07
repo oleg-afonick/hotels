@@ -14,3 +14,7 @@ class UserSchemaAdd(BaseModel):
 class UserSchema(BaseModel):
     id: int
     email: EmailStr
+
+
+class UserSchemaLogin(UserSchema):
+    hashed_password: str
