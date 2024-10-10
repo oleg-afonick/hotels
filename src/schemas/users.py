@@ -15,6 +15,9 @@ class UserSchema(BaseModel):
     id: int
     email: EmailStr
 
+    class Config:
+        from_attributes = True
+
 
 class UserSchemaLogin(UserSchema):
     hashed_password: str

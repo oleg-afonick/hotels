@@ -6,8 +6,13 @@ class HotelSchemaPostPut(BaseModel):
     location: str
 
 
-class HotelSchema(HotelSchemaPostPut):
+class HotelSchema(BaseModel):
     id: int
+    title: str
+    location: str
+
+    class Config:
+        from_attributes = True
 
 
 class HotelSchemaPatch(BaseModel):

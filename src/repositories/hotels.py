@@ -11,7 +11,7 @@ class HotelsRepository(BaseRepository):
     schema = HotelSchema
 
     async def get_all(self, title, location, limit, offset):
-        query = select(self.model).order_by(HotelsModel.id)
+        query = select(self.model).order_by(self.model.id)
         if location:
             query = query.filter(HotelsModel.location.icontains(location))
         if title:

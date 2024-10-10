@@ -22,8 +22,8 @@ class BaseRepository:
         model = result.scalars().one_or_none()
         return self.schema.model_validate(model, from_attributes=True) if model else None
 
-    async def add(self, data: BaseModel):
-        insert_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+    async def add(self, data: BaseModel, **filter_by):
+        insert_stmt = insert(self.model).values(**data.model_dump(), **filter_by).returning(self.model)
         print(insert_stmt.compile(engine, compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(insert_stmt)
         model = result.scalars().one()

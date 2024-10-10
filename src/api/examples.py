@@ -52,3 +52,24 @@ hotels_example = {
         }
     }
 }
+
+rooms_example = {
+    "1": {
+        "summary": "Люкс",
+        "value": {
+            "title": "Люкс",
+            "description": "Комната с кондиционером",
+            "price": 3700,
+            "quantity": 1
+        }
+    },
+    "2": {
+        "summary": "Элит",
+        "value": {
+            "title": "Элит",
+            "description": "Комната с кондиционером и баром",
+            "price": 5700,
+            "quantity": 1
+        }
+    }
+}
