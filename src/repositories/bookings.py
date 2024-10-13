@@ -1,14 +1,15 @@
-from sqlalchemy import select
+from pydantic import BaseModel
+from sqlalchemy import select, insert
 
 from src.database import engine
 from src.repositories.base import BaseRepository
-from src.models.rooms import RoomsModel
-from src.schemas.rooms import RoomSchema
+from src.models.bookings import BookingsModel
+from src.schemas.bookings import BookingSchema
 
 
-class RoomsRepository(BaseRepository):
-    model = RoomsModel
-    schema = RoomSchema
+class BookingsRepository(BaseRepository):
+    model = BookingsModel
+    schema = BookingSchema
 
     async def get_all(self, **filter_by):
         query = select(self.model).filter_by(**filter_by).order_by(self.model.id)

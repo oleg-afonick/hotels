@@ -4,7 +4,9 @@ from fastapi import Query, Depends, Request, HTTPException
 
 from pydantic import BaseModel
 
+from src.database import async_session_maker
 from src.services.auth import auth_service
+from src.utils.db_manager import DatabaseManager
 
 
 class Paginator(BaseModel):
@@ -29,3 +31,11 @@ def get_current_user_id(access_token: str = Depends(get_access_token)):
 
 
 current_user_id = Annotated[int, Depends(get_current_user_id)]
+
+
+async def get_db():
+    async with DatabaseManager(session_factory=async_session_maker) as db:
+        yield db
+
+
+db_session = Annotated[DatabaseManager, Depends(get_db)]
