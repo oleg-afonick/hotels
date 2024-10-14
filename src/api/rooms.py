@@ -9,7 +9,7 @@ router = APIRouter(prefix="/hotels", tags=["Комнаты"])
 
 @router.get("/{hotel_id}/rooms/")
 async def get_rooms(db: db_session, hotel_id: int):
-    return await db.rooms.get_all(hotel_id=hotel_id)
+    return await db.rooms.get_all_with_filter(hotel_id=hotel_id)
 
 
 @router.get("/{hotel_id}/rooms/{room_id}")

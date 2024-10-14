@@ -73,6 +73,3 @@ rooms_example = {
         }
     }
 }
-
-
-bookings_example = {}

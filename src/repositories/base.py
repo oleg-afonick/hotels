@@ -12,12 +12,21 @@ class BaseRepository:
 
     async def get_all(self, *args, **kwargs):
         query = select(self.model)
+        print(query.compile(engine, compile_kwargs={"literal_binds": True}))
+        result = await self.session.execute(query)
+        model = result.scalars().all()
+        return [self.schema.model_validate(obj, from_attributes=True) for obj in model]
+
+    async def get_all_with_filter(self, **filter_by):
+        query = select(self.model).filter_by(**filter_by).order_by(self.model.id)
+        print(query.compile(engine, compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(query)
         model = result.scalars().all()
         return [self.schema.model_validate(obj, from_attributes=True) for obj in model]
 
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
+        print(query.compile(engine, compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()
         return self.schema.model_validate(model, from_attributes=True) if model else None
