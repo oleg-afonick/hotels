@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, Body
+from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 from starlette.middleware.cors import CORSMiddleware
 import sys
@@ -11,6 +11,7 @@ from src.api.hotels import router as hotels_router
 from src.api.auth import router as auth_router
 from src.api.rooms import router as rooms_router
 from src.api.bookings import router as bookings_router
+from src.api.comforts import router as comforts_router
 
 app = FastAPI()
 
@@ -18,6 +19,7 @@ app.include_router(auth_router)
 app.include_router(hotels_router)
 app.include_router(rooms_router)
 app.include_router(bookings_router)
+app.include_router(comforts_router)
 
 
 @app.get("/", include_in_schema=False)

@@ -73,3 +73,36 @@ rooms_example = {
         }
     }
 }
+
+comforts_example = {
+    "1": {
+        "summary": "Кондиционер",
+        "value": {
+            "title": "кондиционер"
+        }
+    },
+    "2": {
+        "summary": "Сейф",
+        "value": {
+            "title": "сейф",
+        }
+    },
+    "3": {
+        "summary": "Ванная",
+        "value": {
+            "title": "ванная",
+        }
+    },
+    "4": {
+        "summary": "Балкон",
+        "value": {
+            "title": "балкон",
+        }
+    },
+    "5": {
+        "summary": "Бар",
+        "value": {
+            "title": "бар",
+        }
+    }
+}

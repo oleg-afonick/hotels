@@ -1,5 +1,3 @@
-from sqlalchemy import select
-
 from src.repositories.utils import available_rooms
 from src.database import engine
 from src.repositories.base import BaseRepository
@@ -17,4 +15,3 @@ class RoomsRepository(BaseRepository):
         result = await self.session.execute(query)
         model = result.scalars().all()
         return [self.schema.model_validate(obj, from_attributes=True) for obj in model]
-

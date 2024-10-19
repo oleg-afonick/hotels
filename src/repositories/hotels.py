@@ -1,5 +1,3 @@
-from sqlalchemy import select
-
 from src.repositories.utils import hotels_with_available_rooms
 from src.schemas.hotels import HotelSchema
 from src.database import engine
@@ -26,6 +24,3 @@ class HotelsRepository(BaseRepository):
         result = await self.session.execute(query)
         model = result.scalars().all()
         return [self.schema.model_validate(obj, from_attributes=True) for obj in model]
-
-
-
