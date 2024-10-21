@@ -6,10 +6,15 @@ class RoomSchemaRequest(BaseModel):
     description: str | None = None
     price: int
     quantity: int
+    comfort_ids: list[int] | None = None
 
 
-class RoomSchemaPostPut(RoomSchemaRequest):
+class RoomSchemaPostPut(BaseModel):
     hotel_id: int
+    title: str
+    description: str | None = None
+    price: int
+    quantity: int
 
 
 class RoomSchema(RoomSchemaPostPut):
@@ -24,7 +29,12 @@ class RoomSchemaPatchRequest(BaseModel):
     description: str | None = None
     price: int | None = None
     quantity: int | None = None
+    comfort_ids: list[int] | None = None
 
 
-class RoomSchemaPatch(RoomSchemaPatchRequest):
+class RoomSchemaPatch(BaseModel):
     hotel_id: int | None = None
+    title: str | None = None
+    description: str | None = None
+    price: int | None = None
+    quantity: int | None = None

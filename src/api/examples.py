@@ -60,7 +60,10 @@ rooms_example = {
             "title": "Люкс",
             "description": "Комната с кондиционером",
             "price": 3700,
-            "quantity": 1
+            "quantity": 1,
+            "comfort_ids": [
+                1, 2
+            ]
         }
     },
     "2": {
@@ -69,7 +72,10 @@ rooms_example = {
             "title": "Элит",
             "description": "Комната с кондиционером и баром",
             "price": 5700,
-            "quantity": 1
+            "quantity": 1,
+            "comfort_ids": [
+                3, 5
+            ]
         }
     }
 }

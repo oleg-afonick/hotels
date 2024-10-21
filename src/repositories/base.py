@@ -17,8 +17,8 @@ class BaseRepository:
         model = result.scalars().all()
         return [self.schema.model_validate(obj, from_attributes=True) for obj in model]
 
-    async def get_all_with_filter(self, **filter_by):
-        query = select(self.model).filter_by(**filter_by).order_by(self.model.id)
+    async def get_all_with_filter(self, *args, **filter_by):
+        query = select(self.model).filter_by(**filter_by).filter(*args).order_by(self.model.id)
         print(query.compile(engine, compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(query)
         model = result.scalars().all()
@@ -37,6 +37,11 @@ class BaseRepository:
         result = await self.session.execute(insert_stmt)
         model = result.scalars().one()
         return self.schema.model_validate(model, from_attributes=True)
+
+    async def add_multiple(self, data: list[BaseModel]):
+        insert_stmt = insert(self.model).values([item.model_dump() for item in data])
+        print(insert_stmt.compile(engine, compile_kwargs={"literal_binds": True}))
+        await self.session.execute(insert_stmt)
 
     async def update(self, data: BaseModel, exclude_unset: bool = False, **filter_by) -> None:
         update_stmt = update(self.model).filter_by(**filter_by).values(**data.model_dump(exclude_unset=exclude_unset))

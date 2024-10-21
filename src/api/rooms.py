@@ -2,6 +2,8 @@ from datetime import date
 
 from fastapi import Body, APIRouter, Query
 
+from src.repositories.utils import update_rooms_comforts
+from src.schemas.comforts import RoomComfortSchemaPostPut
 from src.api.dependencies import db_session
 from src.schemas.rooms import RoomSchemaRequest, RoomSchemaPostPut, RoomSchemaPatchRequest, RoomSchemaPatch
 from src.api.examples import rooms_example
@@ -25,9 +27,20 @@ async def get_room(db: db_session, hotel_id: int, room_id: int):
 
 
 @router.post("/{hotel_id}/rooms/")
-async def post_room(db: db_session, hotel_id: int, room_data: RoomSchemaRequest = Body(openapi_examples=rooms_example)):
+async def post_room(
+        db: db_session,
+        hotel_id: int,
+        room_data: RoomSchemaRequest = Body(openapi_examples=rooms_example)
+):
     _room_data = RoomSchemaPostPut(hotel_id=hotel_id, **room_data.model_dump())
     room = await db.rooms.add(_room_data)
+    comfort_data = [
+        RoomComfortSchemaPostPut(
+            room_id=room.id,
+            comfort_id=comfort_id
+        ) for comfort_id in room_data.comfort_ids
+    ]
+    await db.rooms_comforts.add_multiple(comfort_data)
     await db.commit()
 
     return {"status": "OK", "data": room}
@@ -37,6 +50,7 @@ async def post_room(db: db_session, hotel_id: int, room_data: RoomSchemaRequest 
 async def put_room(db: db_session, hotel_id: int, room_id: int, room_data: RoomSchemaRequest):
     _room_data = RoomSchemaPostPut(hotel_id=hotel_id, **room_data.model_dump())
     await db.rooms.update(_room_data, id=room_id)
+    await update_rooms_comforts(db, room_id, room_data)
     await db.commit()
     return {"status": "OK"}
 
@@ -52,5 +66,6 @@ async def delete_room(db: db_session, hotel_id: int, room_id: int):
 async def patch_room(db: db_session, hotel_id: int, room_id: int, room_data: RoomSchemaPatchRequest):
     _room_data = RoomSchemaPatch(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
     await db.rooms.update(_room_data, id=room_id, exclude_unset=True)
+    await update_rooms_comforts(db, room_id, room_data)
     await db.commit()
     return {"status": "OK"}

@@ -18,8 +18,8 @@ app = FastAPI()
 app.include_router(auth_router)
 app.include_router(hotels_router)
 app.include_router(rooms_router)
-app.include_router(bookings_router)
 app.include_router(comforts_router)
+app.include_router(bookings_router)
 
 
 @app.get("/", include_in_schema=False)
