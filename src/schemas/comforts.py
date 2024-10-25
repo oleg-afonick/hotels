@@ -5,7 +5,7 @@ class ComfortSchemaPostPut(BaseModel):
     title: str
 
 
-class RoomSchema(ComfortSchemaPostPut):
+class ComfortSchema(ComfortSchemaPostPut):
     id: int
 
     class Config:

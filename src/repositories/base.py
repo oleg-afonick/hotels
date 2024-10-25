@@ -48,7 +48,7 @@ class BaseRepository:
         print(update_stmt.compile(engine, compile_kwargs={"literal_binds": True}))
         await self.session.execute(update_stmt)
 
-    async def delete(self, **filter_by) -> None:
-        delete_stmt = delete(self.model).filter_by(**filter_by)
+    async def delete(self, *args, **filter_by) -> None:
+        delete_stmt = delete(self.model).filter_by(**filter_by).filter(*args)
         print(delete_stmt.compile(engine, compile_kwargs={"literal_binds": True}))
         await self.session.execute(delete_stmt)

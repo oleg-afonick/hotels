@@ -2,7 +2,6 @@ from datetime import date
 
 from fastapi import Body, APIRouter, Query
 
-from src.repositories.utils import update_rooms_comforts
 from src.schemas.comforts import RoomComfortSchemaPostPut
 from src.api.dependencies import db_session
 from src.schemas.rooms import RoomSchemaRequest, RoomSchemaPostPut, RoomSchemaPatchRequest, RoomSchemaPatch
@@ -17,13 +16,13 @@ async def get_rooms(
         hotel_id: int,
         date_from: date = Query(example="2024-10-17"),
         date_to: date = Query(example="2024-10-21"),
-        ):
+):
     return await db.rooms.get_all_available_rooms(date_from, date_to, hotel_id=hotel_id)
 
 
 @router.get("/{hotel_id}/rooms/{room_id}")
 async def get_room(db: db_session, hotel_id: int, room_id: int):
-    return await db.rooms.get_one_or_none(id=room_id, hotel_id=hotel_id)
+    return await db.rooms.get_room_with_comforts(id=room_id, hotel_id=hotel_id)
 
 
 @router.post("/{hotel_id}/rooms/")
@@ -50,7 +49,7 @@ async def post_room(
 async def put_room(db: db_session, hotel_id: int, room_id: int, room_data: RoomSchemaRequest):
     _room_data = RoomSchemaPostPut(hotel_id=hotel_id, **room_data.model_dump())
     await db.rooms.update(_room_data, id=room_id)
-    await update_rooms_comforts(db, room_id, room_data)
+    await db.rooms_comforts.set_room_comforts(room_id, room_data.comfort_ids)
     await db.commit()
     return {"status": "OK"}
 
@@ -64,8 +63,10 @@ async def delete_room(db: db_session, hotel_id: int, room_id: int):
 
 @router.patch("/{hotel_id}/rooms/{room_id}")
 async def patch_room(db: db_session, hotel_id: int, room_id: int, room_data: RoomSchemaPatchRequest):
-    _room_data = RoomSchemaPatch(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
-    await db.rooms.update(_room_data, id=room_id, exclude_unset=True)
-    await update_rooms_comforts(db, room_id, room_data)
+    room_data_dict = room_data.model_dump(exclude_unset=True)
+    room_data_patch = RoomSchemaPatch(hotel_id=hotel_id, **room_data_dict)
+    await db.rooms.update(room_data_patch, id=room_id, exclude_unset=True)
+    if 'comfort_ids' in room_data_dict:
+        await db.rooms_comforts.set_room_comforts(room_id, room_data_dict['comfort_ids'])
     await db.commit()
     return {"status": "OK"}

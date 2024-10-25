@@ -37,28 +37,6 @@ def hotels_with_available_rooms(date_from, date_to):
     return query
 
 
-async def update_rooms_comforts(db, room_id, room_data):
-    comforts = await db.rooms_comforts.get_all_with_filter(room_id=room_id)
-    current_comfort_ids = [comfort.comfort_id for comfort in comforts]
-    if room_data.comfort_ids:
-        comforts_delete = await db.rooms_comforts.get_all_with_filter(
-            RoomsComfortsModel.comfort_id.not_in(
-                room_data.comfort_ids
-            ),
-            room_id=room_id
-        )
-        if comforts_delete:
-            for com_del in comforts_delete:
-                await db.rooms_comforts.delete(room_id=com_del.room_id, comfort_id=com_del.comfort_id)
-        add_comfort_ids = []
-        for comfort_id in room_data.comfort_ids:
-            if comfort_id not in current_comfort_ids:
-                add_comfort_ids.append(comfort_id)
-        if add_comfort_ids:
-            comfort_data = [
-                RoomComfortSchemaPostPut(
-                    room_id=room_id,
-                    comfort_id=comfort_id
-                ) for comfort_id in add_comfort_ids
-            ]
-            await db.rooms_comforts.add_multiple(comfort_data)
+
+
+
