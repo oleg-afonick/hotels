@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Body
+from fastapi_cache.decorator import cache
 
 from src.schemas.bookings import BookingSchemaRequest, BookingSchemaPostPut
 from src.api.dependencies import db_session, current_user_id
@@ -22,6 +23,7 @@ async def post_booking(
 
 
 @router.get("")
+@cache(expire=30)
 async def get_bookings(db: db_session):
     bookings = await db.bookings.get_all()
     return {"status": "OK", "data": bookings}

@@ -17,9 +17,6 @@ class BookingSchemaPostPut(BookingSchemaRequest):
 class BookingSchema(BookingSchemaPostPut):
     id: int
 
-    class Config:
-        from_attributes = True
-
 
 class BookingSchemaPatchRequest(BaseModel):
     ...

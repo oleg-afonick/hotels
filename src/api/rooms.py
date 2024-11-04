@@ -1,6 +1,7 @@
 from datetime import date
 
 from fastapi import Body, APIRouter, Query
+from fastapi_cache.decorator import cache
 
 from src.schemas.comforts import RoomComfortSchemaPostPut
 from src.api.dependencies import db_session
@@ -11,6 +12,7 @@ router = APIRouter(prefix="/hotels", tags=["Комнаты"])
 
 
 @router.get("/{hotel_id}/rooms/")
+@cache(expire=30)
 async def get_rooms(
         db: db_session,
         hotel_id: int,
@@ -21,6 +23,7 @@ async def get_rooms(
 
 
 @router.get("/{hotel_id}/rooms/{room_id}")
+@cache(expire=30)
 async def get_room(db: db_session, hotel_id: int, room_id: int):
     return await db.rooms.get_room_with_comforts(id=room_id, hotel_id=hotel_id)
 
@@ -56,7 +59,7 @@ async def put_room(db: db_session, hotel_id: int, room_id: int, room_data: RoomS
 
 @router.delete("/{hotel_id}/rooms/{room_id}")
 async def delete_room(db: db_session, hotel_id: int, room_id: int):
-    await db.rooms.delete(hotel_id=hotel_id, id=room_id)
+    await db.rooms.delete(hotel_id, room_id)
     await db.commit()
     return {"status": "OK"}
 

@@ -8,9 +8,6 @@ class ComfortSchemaPostPut(BaseModel):
 class ComfortSchema(ComfortSchemaPostPut):
     id: int
 
-    class Config:
-        from_attributes = True
-
 
 class RoomComfortSchemaPostPut(BaseModel):
     room_id: int
@@ -19,6 +16,3 @@ class RoomComfortSchemaPostPut(BaseModel):
 
 class RoomComfortSchema(RoomComfortSchemaPostPut):
     id: int
-
-    class Config:
-        from_attributes = True

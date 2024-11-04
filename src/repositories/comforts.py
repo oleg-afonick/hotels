@@ -1,5 +1,6 @@
 from sqlalchemy import select, insert, delete
 
+from src.mappers.mappers import ComfortMapper, RoomComfortMapper
 from src.database import engine
 from src.repositories.base import BaseRepository
 from src.models.comforts import ComfortsModel, RoomsComfortsModel
@@ -8,12 +9,12 @@ from src.schemas.comforts import ComfortSchema, RoomComfortSchema
 
 class ComfortsRepository(BaseRepository):
     model = ComfortsModel
-    schema = ComfortSchema
+    mapper = ComfortMapper
 
 
 class RoomsComfortsRepository(BaseRepository):
     model = RoomsComfortsModel
-    schema = RoomComfortSchema
+    mapper = RoomComfortMapper
 
     async def set_room_comforts(self, room_id: int, comfort_ids: list[int]):
         query = select(self.model.comfort_id).filter_by(room_id=room_id)

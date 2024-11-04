@@ -11,9 +11,6 @@ class HotelSchema(BaseModel):
     title: str
     location: str
 
-    class Config:
-        from_attributes = True
-
 
 class HotelSchemaPatch(BaseModel):
     title: str | None = None

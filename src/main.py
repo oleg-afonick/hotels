@@ -1,25 +1,33 @@
+import sys
+from contextlib import asynccontextmanager
+from pathlib import Path
+
 import uvicorn
+
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 from starlette.middleware.cors import CORSMiddleware
-import sys
-from pathlib import Path
+
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.api.hotels import router as hotels_router
-from src.api.auth import router as auth_router
-from src.api.rooms import router as rooms_router
-from src.api.bookings import router as bookings_router
-from src.api.comforts import router as comforts_router
+from src.api import api_router
+from src.setup import redis_connector
 
-app = FastAPI()
 
-app.include_router(auth_router)
-app.include_router(hotels_router)
-app.include_router(rooms_router)
-app.include_router(comforts_router)
-app.include_router(bookings_router)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await redis_connector.connect()
+    FastAPICache.init(RedisBackend(redis_connector.redis), prefix="fastapi-cache")
+    yield
+    await redis_connector.disconnect()
+
+
+app = FastAPI(lifespan=lifespan)
+
+app.include_router(api_router)
 
 
 @app.get("/", include_in_schema=False)

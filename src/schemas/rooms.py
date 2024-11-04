@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from schemas.comforts import ComfortSchemaPostPut
+from src.schemas.comforts import ComfortSchemaPostPut
 
 
 class RoomSchemaRequest(BaseModel):
@@ -21,10 +21,11 @@ class RoomSchemaPostPut(BaseModel):
 
 class RoomSchema(RoomSchemaPostPut):
     id: int
-    comforts: list[ComfortSchemaPostPut]
 
-    class Config:
-        from_attributes = True
+
+class RoomM2MSchema(RoomSchemaPostPut):
+    id: int
+    comforts: list[ComfortSchemaPostPut]
 
 
 class RoomSchemaPatchRequest(BaseModel):
