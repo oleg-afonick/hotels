@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.schemas.comforts import ComfortSchemaPostPut
 
@@ -8,7 +8,7 @@ class RoomSchemaRequest(BaseModel):
     description: str | None = None
     price: int
     quantity: int
-    comfort_ids: list[int] = []
+    comfort_ids: list[int] = Field(default_factory=list)
 
 
 class RoomSchemaPostPut(BaseModel):

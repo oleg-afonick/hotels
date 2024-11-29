@@ -28,6 +28,12 @@ async def get_bookings(db: db_session):
     bookings = await db.bookings.get_all()
     return {"status": "OK", "data": bookings}
 
+@router.get("/checkin_today")
+@cache(expire=30)
+async def get_bookings_checkin_today(db: db_session):
+    bookings = await db.bookings.get_bookings_checkin_today()
+    return {"status": "OK", "data": bookings}
+
 
 @router.get("/me")
 async def get_my_bookings(

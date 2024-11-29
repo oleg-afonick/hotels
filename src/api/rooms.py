@@ -36,13 +36,14 @@ async def post_room(
 ):
     _room_data = RoomSchemaPostPut(hotel_id=hotel_id, **room_data.model_dump())
     room = await db.rooms.add(_room_data)
-    comfort_data = [
-        RoomComfortSchemaPostPut(
-            room_id=room.id,
-            comfort_id=comfort_id
-        ) for comfort_id in room_data.comfort_ids
-    ]
-    await db.rooms_comforts.add_multiple(comfort_data)
+    if room_data.comfort_ids:
+        comfort_data = [
+            RoomComfortSchemaPostPut(
+                room_id=room.id,
+                comfort_id=comfort_id
+            ) for comfort_id in room_data.comfort_ids
+        ]
+        await db.rooms_comforts.add_multiple(comfort_data)
     await db.commit()
 
     return {"status": "OK", "data": room}

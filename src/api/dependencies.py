@@ -39,3 +39,5 @@ async def get_db():
 
 
 db_session = Annotated[DatabaseManager, Depends(get_db)]
+
+

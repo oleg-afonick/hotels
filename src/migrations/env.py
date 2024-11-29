@@ -7,11 +7,7 @@ from alembic import context
 
 from src.config import settings
 from src.database import Base
-from models.hotels import HotelsModel
-from models.rooms import RoomsModel
-from models.users import UsersModel
-from models.bookings import BookingsModel
-from models.comforts import ComfortsModel, RoomsComfortsModel
+from src.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

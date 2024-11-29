@@ -1,7 +1,10 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    MODE: Literal["TEST", "LOCAL", "DEV", "PROD"]
     DB_USER: str
     DB_PASS: str
     DB_HOST: str
@@ -9,6 +12,14 @@ class Settings(BaseSettings):
     DB_NAME: str
     REDIS_HOST: str
     REDIS_PORT: int
+    EMAIL_BACKEND: str
+    SMTP_SERVER: str
+    SMTP_PORT_SSL: int
+    SMTP_PORT_TLS: int
+    EMAIL_HOST_USER: str
+    SENDER_PASSWORD: str
+    SENDER_EMAIL: str
+    USE_SSL: bool
 
     @property
     def REDIS_URL(self):
