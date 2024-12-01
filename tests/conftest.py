@@ -1,4 +1,10 @@
 import json
+from unittest import mock
+
+from services.auth import auth_service
+
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
+
 import pytest
 from httpx import AsyncClient
 
@@ -9,7 +15,7 @@ from src.database import engine_null_pool, Base
 from src.config import settings
 from src.main import app
 from src.api.dependencies import db_session
-from src.database import async_session_maker_null_pool
+from src.database import async_session_maker
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -26,7 +32,7 @@ async def setup_database(check_test_mode):
 
 @pytest.fixture(scope="function")
 async def db(setup_database) -> db_session:
-    async with db_session(session_factory=async_session_maker_null_pool) as db:
+    async with db_session(session_factory=async_session_maker) as db:
         yield db
 
 
@@ -40,6 +46,19 @@ async def ac(setup_database) -> AsyncClient:
 async def test_user_register(ac, setup_database):
     await ac.post("/auth/register", json={"email": "test@test.ru", "password": "test"})
 
+@pytest.fixture(scope="session", autouse=True)
+async def auth_ac(test_user_register, ac):
+    response_login = await ac.post("/auth/login", json={"email": "test@test.ru", "password": "test"})
+    access_token = response_login.json()["access_token"]
+    access_token_data = auth_service.decode_access_token(access_token)
+    user_id = access_token_data["user_id"]
+    response_user = await ac.get("/auth/current_user", params={"id": user_id})
+    current_user = response_user.json()
+    assert access_token_data["user_id"] == current_user["id"]
+
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        yield ac
+
 
 @pytest.fixture(scope="session", autouse=True)
 async def test_add_objects(setup_database):
@@ -47,25 +66,11 @@ async def test_add_objects(setup_database):
         hotels_json = json.load(file_hotels)
     with open("tests/mocks/mock_rooms.json", encoding="utf-8") as file_rooms:
         rooms_json = json.load(file_rooms)
-    async with db_session(session_factory=async_session_maker_null_pool) as session_db:
+    async with db_session(session_factory=async_session_maker) as session_db:
         hotels_data = [HotelSchemaPostPut.model_validate(hotel) for hotel in hotels_json]
         rooms_data = [RoomSchemaPostPut.model_validate(room) for room in rooms_json]
         await  session_db.hotels.add_multiple(hotels_data)
         await  session_db.rooms.add_multiple(rooms_data)
         await session_db.commit()
 
-# @pytest.fixture(scope="session", autouse=True)
-# async def test_add_comforts(ac, test_add_hotels):
-#     with open("tests/mock_comforts.json", encoding="utf-8") as file:
-#         comforts_data = json.load(file)
-#     for comfort in comforts_data:
-#         await ac.post("/comforts", json=comfort)
-#
-#
-# @pytest.fixture(scope="session", autouse=True)
-# async def test_add_rooms(ac, test_add_comforts):
-#     with open("tests/mock_rooms.json", encoding="utf-8") as file:
-#         rooms_data = json.load(file)
-#     for room in rooms_data:
-#         hotel_id = room.pop('hotel_id')
-#         await ac.post(f"/hotels/{hotel_id}/rooms/", json=room)
+
