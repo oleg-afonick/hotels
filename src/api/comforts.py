@@ -11,7 +11,7 @@ router = APIRouter(prefix="/comforts", tags=["Удобства"])
 
 
 @router.get("")
-@cache(expire=30)
+# @cache(expire=30)
 async def get_comforts(db: db_session):
     # digit_task.delay(10)
     return await db.comforts.get_all()

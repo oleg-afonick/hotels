@@ -2,12 +2,11 @@ import json
 import pytest
 from httpx import AsyncClient
 
-from src.schemas.comforts import ComfortSchemaPostPut
+from src.models import *
 from src.schemas.hotels import HotelSchemaPostPut
 from src.schemas.rooms import RoomSchemaPostPut
 from src.database import engine_null_pool, Base
 from src.config import settings
-from src.models import *
 from src.main import app
 from src.api.dependencies import db_session
 from src.database import async_session_maker_null_pool
@@ -55,3 +54,18 @@ async def test_add_objects(setup_database):
         await  session_db.rooms.add_multiple(rooms_data)
         await session_db.commit()
 
+# @pytest.fixture(scope="session", autouse=True)
+# async def test_add_comforts(ac, test_add_hotels):
+#     with open("tests/mock_comforts.json", encoding="utf-8") as file:
+#         comforts_data = json.load(file)
+#     for comfort in comforts_data:
+#         await ac.post("/comforts", json=comfort)
+#
+#
+# @pytest.fixture(scope="session", autouse=True)
+# async def test_add_rooms(ac, test_add_comforts):
+#     with open("tests/mock_rooms.json", encoding="utf-8") as file:
+#         rooms_data = json.load(file)
+#     for room in rooms_data:
+#         hotel_id = room.pop('hotel_id')
+#         await ac.post(f"/hotels/{hotel_id}/rooms/", json=room)
