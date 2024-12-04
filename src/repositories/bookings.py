@@ -58,4 +58,5 @@ class BookingsRepository(BaseRepository):
             result = await self.session.execute(insert_stmt)
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
-        return "Нет свободных номеров!"
+        else:
+            raise HTTPException(status_code=500, detail="Нет свободных комнат!")
