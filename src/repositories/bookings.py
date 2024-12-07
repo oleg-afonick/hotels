@@ -6,6 +6,7 @@ from sqlalchemy import select
 from pydantic import BaseModel
 from sqlalchemy import insert
 
+from src.exceptions import NoFreeRoomsException
 from schemas.rooms import RoomM2MSchema
 from src.models import RoomsModel
 from src.mappers.mappers import BookingMapper, RoomM2MMapper
@@ -58,5 +59,5 @@ class BookingsRepository(BaseRepository):
             result = await self.session.execute(insert_stmt)
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
-        else:
-            raise HTTPException(status_code=500, detail="Нет свободных комнат!")
+
+        raise NoFreeRoomsException

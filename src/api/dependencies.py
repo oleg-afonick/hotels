@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import Query, Depends, Request, HTTPException
+from jwt import ExpiredSignatureError
 
 from pydantic import BaseModel
 
@@ -25,9 +26,14 @@ def get_access_token(request: Request):
 
 
 def get_current_user_id(access_token: str = Depends(get_access_token)):
-    data = auth_service.decode_access_token(access_token)
-    user_id = data.get("user_id")
-    return user_id
+    try:
+        data = auth_service.decode_access_token(access_token)
+        user_id = data.get("user_id")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Пользователь не найден")
+        return user_id
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Токен истёк или недействителен")
 
 
 current_user_id = Annotated[int, Depends(get_current_user_id)]

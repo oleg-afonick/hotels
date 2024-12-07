@@ -1,6 +1,8 @@
 from sqlalchemy import select, insert, update, delete
 from pydantic import BaseModel
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
+from src.exceptions import ObjectNotFoundException, HotelsException
 from src.mappers.base import DataMapper
 from src.database import engine
 
@@ -27,6 +29,17 @@ class BaseRepository:
         model = result.scalars().all()
         return [self.mapper.map_to_domain_entity(obj) for obj in model]
 
+    async def get_one(self, **filter_by):
+        query = select(self.model).filter_by(**filter_by)
+        print(query.compile(engine, compile_kwargs={"literal_binds": True}))
+        result = await self.session.execute(query)
+        try:
+            model = result.scalar_one()
+            return self.mapper.map_to_domain_entity(model) if model else None
+        except NoResultFound:
+            raise ObjectNotFoundException
+
+
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
         print(query.compile(engine, compile_kwargs={"literal_binds": True}))
@@ -37,9 +50,12 @@ class BaseRepository:
     async def add(self, data: BaseModel, **filter_by):
         insert_stmt = insert(self.model).values(**data.model_dump(), **filter_by).returning(self.model)
         print(insert_stmt.compile(engine, compile_kwargs={"literal_binds": True}))
-        result = await self.session.execute(insert_stmt)
-        model = result.scalars().one()
-        return self.mapper.map_to_domain_entity(model)
+        try:
+            result = await self.session.execute(insert_stmt)
+            model = result.scalars().one()
+            return self.mapper.map_to_domain_entity(model)
+        except IntegrityError:
+            raise HotelsException
 
     async def add_multiple(self, data: list[BaseModel]):
         insert_stmt = insert(self.model).values([item.model_dump() for item in data])

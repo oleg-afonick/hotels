@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, HTTPException
 from fastapi_cache.decorator import cache
 
 from src.schemas.bookings import BookingSchemaRequest, BookingSchemaPostPut
 from src.api.dependencies import db_session, current_user_id
+from src.exceptions import ObjectNotFoundException, NoFreeRoomsException
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
@@ -13,10 +14,16 @@ async def post_booking(
         user_id: current_user_id,
         booking_data: BookingSchemaRequest
 ):
-    room = await db.rooms.get_one_or_none(id=booking_data.room_id)
+    try:
+        room = await db.rooms.get_one(id=booking_data.room_id)
+    except ObjectNotFoundException:
+        raise HTTPException(status_code=404, detail="Номер не найден")
     price: int = room.price
     _booking_data = BookingSchemaPostPut(user_id=user_id, price=price, **booking_data.model_dump())
-    booking = await db.bookings.add_booking(_booking_data)
+    try:
+        booking = await db.bookings.add_booking(_booking_data)
+    except NoFreeRoomsException as ex:
+        raise HTTPException(status_code=409, detail=ex.detail)
     await db.commit()
 
     return {"status": "OK", "data": booking}
