@@ -10,7 +10,7 @@ from src.database import async_session_maker
     (1, "2025-01-07", "2025-01-12", 200),
     (1, "2025-01-08", "2025-01-13", 200),
     (1, "2025-01-09", "2025-01-14", 200),
-    (1, "2025-01-10", "2025-01-15", 500),
+    (1, "2025-01-10", "2025-01-15", 409),
     (1, "2025-01-17", "2025-01-27", 200)
 ])
 async def test_add_bookings(room_id, date_from, date_to, status_code, db, auth_ac):
@@ -18,11 +18,12 @@ async def test_add_bookings(room_id, date_from, date_to, status_code, db, auth_a
     booking_data = {"room_id": room_id, "date_from": date_from, "date_to": date_to}
     response = await auth_ac.post("/bookings", json=booking_data)
     response_dict = response.json()
+    assert response.status_code == status_code
     if response.status_code == 200:
-        assert response.status_code == status_code
         assert response_dict["status"] =="OK"
         assert response_dict["data"]["room_id"] == room_id
         assert response_dict["data"]["price"] == room.price
+
 
 
 @pytest.fixture(scope="session")

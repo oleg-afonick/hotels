@@ -2,7 +2,7 @@ from sqlalchemy import select, insert, update, delete
 from pydantic import BaseModel
 from sqlalchemy.exc import NoResultFound, IntegrityError
 
-from src.exceptions import ObjectNotFoundException, HotelsException
+from src.exceptions import ObjectNotFoundException, BookingException
 from src.mappers.base import DataMapper
 from src.database import engine
 
@@ -55,7 +55,7 @@ class BaseRepository:
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError:
-            raise HotelsException
+            raise BookingException
 
     async def add_multiple(self, data: list[BaseModel]):
         insert_stmt = insert(self.model).values([item.model_dump() for item in data])

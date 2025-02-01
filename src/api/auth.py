@@ -12,6 +12,8 @@ router = APIRouter(prefix="/auth", tags=["Регистрация и аутент
 
 @router.post("/register")
 async def register_user(db: db_session, data: UserSchemaRequestAdd = Body(openapi_examples=users_example)):
+    if not data.password:
+        raise HTTPException(status_code=422, detail="Введите пароль")
     hashed_password = auth_service.hashed_password(data.password)
     user_database = UserSchemaAdd(email=data.email, hashed_password=hashed_password)
     try:

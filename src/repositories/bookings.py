@@ -1,20 +1,17 @@
 from datetime import date
 
-from fastapi import HTTPException
-from pendulum import today
 from sqlalchemy import select
 from pydantic import BaseModel
 from sqlalchemy import insert
 
 from src.exceptions import NoFreeRoomsException
-from schemas.rooms import RoomM2MSchema
 from src.models import RoomsModel
-from src.mappers.mappers import BookingMapper, RoomM2MMapper
+from src.mappers.mappers import BookingMapper
 from src.database import engine
 from src.repositories.base import BaseRepository
 from src.models.bookings import BookingsModel
 from src.repositories.utils import available_rooms
-from sqlalchemy.orm import selectinload
+
 
 
 class BookingsRepository(BaseRepository):

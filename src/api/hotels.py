@@ -1,12 +1,18 @@
 from datetime import date
 
-from fastapi import Body, Query, APIRouter, HTTPException
+from fastapi import Body, Query, APIRouter
 from fastapi_cache.decorator import cache
 
+from src.services.hotels import HotelService
 from src.api.examples import hotels_example
-from src.exceptions import DateFromLaterDateToException, ObjectNotFoundException
 from src.api.dependencies import paginator, db_session
 from src.schemas.hotels import HotelSchemaPostPut, HotelSchemaPatch
+from src.exceptions import (
+    DateFromLaterDateToException,
+    ObjectNotFoundException,
+    HotelNotFoundHTTPException,
+    DateFromLaterDateToHTTPException,
+)
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
@@ -21,54 +27,46 @@ async def get_hotels(
         location: str | None = Query(None, description="Адрес отеля"),
         title: str | None = Query(None, description="Название отеля"),
 ):
-    per_page = pagination.per_page or 5
-
     try:
-        return await db.hotels.get_all_with_available_rooms(
+        return await HotelService(db).get_all_with_available_rooms(
+            pagination,
             date_from,
             date_to,
-            title=title,
-            location=location,
-            limit=per_page,
-            offset=(pagination.page - 1) * per_page
+            location,
+            title
         )
-    except DateFromLaterDateToException as ex:
-        raise HTTPException(status_code=409, detail=ex.detail)
+    except DateFromLaterDateToException:
+        raise DateFromLaterDateToHTTPException
 
 
 @router.get("/{hotel_id}")
 @cache(expire=30)
-async def get_hotel(db: db_session, hotel_id: int,):
+async def get_hotel(db: db_session, hotel_id: int, ):
     try:
-        return await db.hotels.get_one(id=hotel_id)
+        return await HotelService(db).get_hotel(hotel_id)
     except ObjectNotFoundException:
-        raise HTTPException(status_code=404, detail="Отель не найден")
+        raise HotelNotFoundHTTPException
 
 
 @router.post("")
 async def post_hotel(db: db_session, hotel_data: HotelSchemaPostPut = Body(openapi_examples=hotels_example)):
-    hotel = await db.hotels.add(hotel_data)
-    await db.commit()
-
+    hotel = await HotelService(db).post_hotel(hotel_data)
     return {"status": "OK", "data": hotel}
 
 
 @router.put("/{hotel_id}")
 async def put_hotel(db: db_session, hotel_id: int, hotel_data: HotelSchemaPostPut):
-    await db.hotels.update(id=hotel_id, data=hotel_data)
-    await db.commit()
-    return {"status": "OK"}
-
-
-@router.delete("/{hotel_id}")
-async def delete_hotel(db: db_session, hotel_id: int):
-    await db.hotels.delete(id=hotel_id)
-    await db.commit()
+    await HotelService(db).put_hotel(hotel_id, hotel_data)
     return {"status": "OK"}
 
 
 @router.patch("/{hotel_id}")
 async def patch_hotel(db: db_session, hotel_id: int, hotel_data: HotelSchemaPatch):
-    await db.hotels.update(id=hotel_id, exclude_unset=True, data=hotel_data)
-    await db.commit()
+    await HotelService(db).patch_hotel(hotel_id, hotel_data)
+    return {"status": "OK"}
+
+
+@router.delete("/{hotel_id}")
+async def delete_hotel(db: db_session, hotel_id: int):
+    await HotelService(db).delete_hotel(hotel_id)
     return {"status": "OK"}
